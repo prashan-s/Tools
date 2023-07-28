@@ -99,18 +99,23 @@ extension LocalAuthenticationManager{
 //MARK: Public Functions
 extension LocalAuthenticationManager{
     
-    public func evaluate(localizedReason: String,evaluation: @escaping LAManager.LAMResultCompletion ){
+    public func evaluate(localizedReason: String = "Access requires authentication",
+                         evaluation: @escaping LAManager.LAMResultCompletion ){
+        
         let result = canEvaluatePolicy()
         if case LAMResult.Success = result{
             self.evaluvatePolicy(localizedReason: localizedReason) { evaluatedResult in
                 evaluation(evaluatedResult)
             }
-        }else {
+            
+        } else {
             evaluation(result)
         }
     }
     
-    public func evaluateWithSimplifiedReason(localizedReason: String,evaluation: @escaping LAManager.LAMResultSimplifiedCompletion)  {
+    public func evaluateWithSimplifiedResult(localizedReason: String = "Access requires authentication",
+                                             evaluation: @escaping LAManager.LAMResultSimplifiedCompletion)  {
+        
         self.evaluate(localizedReason: localizedReason) { lamResult in
             switch lamResult{
             case .Success:
