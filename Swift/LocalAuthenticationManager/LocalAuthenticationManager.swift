@@ -3,7 +3,7 @@
 //  HostingApp
 //
 //  Created by Prashan Samarathunge on 2023-07-28.
-//  Copyright © 2023 MPCS. All rights reserved.
+//  Copyright © 2023 Bhasha. All rights reserved.
 //
 
 import Foundation
@@ -15,11 +15,7 @@ public final class LocalAuthenticationManager{
     //MARK: TypeAlias
     
     public typealias LAMResultCompletion = (LAMResult) -> Void
-    
-    public enum LAMResult{
-        case Success
-        case Faliure(LAError.Code)
-    }
+    public typealias LAMResultSimplifiedCompletion = (LAMSimplifiedResult) -> Void
     
     //MARK: - Enum
     enum Mode{
@@ -31,7 +27,18 @@ public final class LocalAuthenticationManager{
         case BioMetricsOnly
     }
     
+    public enum LAMResult{
+        case Success
+        case Faliure(LAError.Code)
+    }
     
+    public enum LAMSimplifiedResult{
+        case Success
+        case CanRetryAgainWithAFaliure
+        case BiometricLockout
+        case BiometricNotAvailable
+        case BiometicNotEnrolled
+    }
     
     
     //MARK: - Classes
@@ -100,6 +107,28 @@ extension LocalAuthenticationManager{
             }
         }else {
             evaluation(result)
+        }
+    }
+    
+    public func evaluateWithSimplifiedReason(localizedReason: String,evaluation: @escaping LAManager.LAMResultSimplifiedCompletion)  {
+        self.evaluate(localizedReason: localizedReason) { lamResult in
+            switch lamResult{
+            case .Success:
+                evaluation(.Success)
+            case .Faliure(let error):
+                switch error{
+                case .authenticationFailed, .userFallback, .userCancel, .systemCancel:
+                    evaluation(.CanRetryAgainWithAFaliure)
+                case .biometryLockout:
+                    evaluation(.BiometricLockout)
+                case .biometryNotAvailable:
+                    evaluation(.BiometricNotAvailable)
+                case .biometryNotEnrolled:
+                    evaluation(.BiometicNotEnrolled)
+                default:
+                    evaluation(.BiometricLockout)
+                }
+            }
         }
     }
     
