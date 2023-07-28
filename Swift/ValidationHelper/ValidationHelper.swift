@@ -1,6 +1,5 @@
 //
 //  ValidationHelper.swift
-//  helapay-for-business-ios
 //
 //  Created by Prashan Samarathunge on 2022-01-10.
 //
