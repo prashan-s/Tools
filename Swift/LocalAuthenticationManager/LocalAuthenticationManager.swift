@@ -20,7 +20,7 @@ public final class LocalAuthenticationManager{
     //MARK: - Enum
     enum Mode{
         ///@description
-        ///Fallbacks are enabled
+        ///Fallbacks are also enabled
         case Default
         ///@description
         ///Only The Biometric options are used to authenticate
