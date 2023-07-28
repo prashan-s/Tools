@@ -16,6 +16,7 @@ public final class LocalAuthenticationManager{
     
     public typealias LAMResultCompletion = (LAMResult) -> Void
     public typealias LAMResultSimplifiedCompletion = (LAMSimplifiedResult) -> Void
+    public typealias LAMResultActionCallback = (LAMAction) -> Void
     
     //MARK: - Enum
     enum Mode{
@@ -40,6 +41,10 @@ public final class LocalAuthenticationManager{
         case BiometicNotEnrolled
     }
     
+    public enum LAMAction{
+        case TryAgain
+        case None
+    }
     
     //MARK: - Classes
     
@@ -147,7 +152,7 @@ extension LocalAuthenticationManager{
     
     public func canEvaluatePolicy() -> LAMResult{
         if currentContext.canEvaluatePolicy(LAPolicy.deviceOwnerAuthenticationWithBiometrics,
-                                            error: &error){
+                                            error: &self.error){
             
             return .Success
         }else{
@@ -164,6 +169,11 @@ extension LocalAuthenticationManager{
             }
             
         }
+    }
+    
+    public func canEvaluatePolicyOrNot() -> Bool{
+        return currentContext.canEvaluatePolicy(LAPolicy.deviceOwnerAuthenticationWithBiometrics,
+                                            error: &self.error)
     }
     
     public func evaluvatePolicy(localizedReason:String = "Access requires authentication",
