@@ -64,7 +64,7 @@ public final class LocalAuthenticationManager{
     
     //MARK: - Class Life Cycle
     init(mode:Mode = .Default) {
-        var context = LAContext()
+        let context = LAContext()
         switch mode{
         case .Default:
             break
@@ -76,6 +76,11 @@ public final class LocalAuthenticationManager{
         self.error = createInitialError()
     }
     
+    private func runOnMain(completion: @escaping () -> Void){
+        DispatchQueue.main.async {
+            completion()
+        }
+    }
     
    
    
@@ -100,21 +105,24 @@ extension LocalAuthenticationManager{
 extension LocalAuthenticationManager{
     
     public func evaluate(localizedReason: String = "Access requires authentication",
-                         evaluation: @escaping LAManager.LAMResultCompletion ){
+                         _ evaluation: @escaping LAManager.LAMResultCompletion ){
         
         let result = canEvaluatePolicy()
         if case LAMResult.Success = result{
             self.evaluvatePolicy(localizedReason: localizedReason) { evaluatedResult in
+                
                 evaluation(evaluatedResult)
+                
             }
             
         } else {
             evaluation(result)
+            
         }
     }
     
     public func evaluateWithSimplifiedResult(localizedReason: String = "Access requires authentication",
-                                             evaluation: @escaping LAManager.LAMResultSimplifiedCompletion)  {
+                                             _ evaluation: @escaping LAManager.LAMResultSimplifiedCompletion)  {
         
         self.evaluate(localizedReason: localizedReason) { lamResult in
             switch lamResult{
@@ -164,24 +172,28 @@ extension LocalAuthenticationManager{
         self.currentContext.evaluatePolicy(LAPolicy.deviceOwnerAuthenticationWithBiometrics,
                                            localizedReason: localizedReason) {  [weak self] success, error in
             guard let `self` else {return}
-            
-            if success{
-                //Success Scenario
-                completion(.Success)
-            }else{
-                
-                if let errorResult = error as? NSError{
-                    return completion(self.asLAMResult(errorResult))
+            self.runOnMain {
+                if success{
+                    //Success Scenario
+                    completion(.Success)
                 }else{
-                    return completion(.Faliure(.invalidContext))
+                    
+                    if let errorResult = error as? NSError{
+                        return completion(self.asLAMResult(errorResult))
+                    }else{
+                        return completion(.Faliure(.invalidContext))
+                    }
+                    
                 }
-                
             }
         }
     }
     
-    private func asLAMResult(_ error:NSError) -> LAMResult{
-        if let errorResult = LAError.Code(rawValue: self.error.code){
+    private func asLAMResult(_ error:NSError?) -> LAMResult{
+        guard let error else {
+            return .Faliure(.invalidContext)
+        }
+        if let errorResult = LAError.Code(rawValue: error.code){
             //Parsed Error
             return .Faliure(errorResult)
         }else{
