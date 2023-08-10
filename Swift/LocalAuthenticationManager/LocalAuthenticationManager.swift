@@ -1,9 +1,9 @@
 //
 //  LocalAuthenticationManager.swift
-//  HostingApp
+//
 //
 //  Created by Prashan Samarathunge on 2023-07-28.
-//  Copyright © 2023 Bhasha. All rights reserved.
+//  Copyright © 2023 MPCS. All rights reserved.
 //
 
 import Foundation
